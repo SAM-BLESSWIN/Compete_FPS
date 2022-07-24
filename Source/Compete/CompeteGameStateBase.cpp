@@ -16,16 +16,21 @@ void ACompeteGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty
 }
 
 void ACompeteGameStateBase::OnRep_TotalHits()
-{//ON THE CLIENT
-	UE_LOG(LogTemp, Warning, TEXT("Client : TotalHits = %d"), TotalHits);
+{
+	UE_LOG(LogTemp, Warning, TEXT("Total Hits : %d"),TotalHits);
 }
 
 void ACompeteGameStateBase::PlayerHit()
-{
-	if (HasAuthority())
-	{//ON THE SERVER
-		UE_LOG(LogTemp, Warning, TEXT("GameState:PlayerHit Called"));
-		TotalHits++;
-		UE_LOG(LogTemp, Warning, TEXT("Server : TotalHits = %d"), TotalHits);
+{//ON THE SERVER
+	if (GetWorld()->IsServer())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameState [Server]"));
+		TotalHits++;         //Make OnRep_TotalHits() call on the Clients
+		//OnRep_TotalHits(); //Make OnRep_TotalHits() call on the Server
 	}
+}
+
+uint16 ACompeteGameStateBase::GetTotalHits() const
+{
+	return TotalHits;
 }

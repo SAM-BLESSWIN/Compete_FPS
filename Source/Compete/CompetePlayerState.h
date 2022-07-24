@@ -16,5 +16,14 @@ class COMPETE_API ACompetePlayerState : public APlayerState
 
 public:
 	ACompetePlayerState();
-	
+
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerHits)
+	uint16 PlayerHits;
+
+	UFUNCTION()
+	void OnRep_PlayerHits();
+
+public:
+	void PlayerHit();
 };

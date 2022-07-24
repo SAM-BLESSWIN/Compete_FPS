@@ -46,6 +46,7 @@ void UTP_WeaponComponent::Fire()
 void UTP_WeaponComponent::SpawnProjectile(const FVector& SpawnLocation, const FRotator& SpawnRotation)
 {
 	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.Owner = Character;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	GetWorld()->SpawnActor<ACompeteProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 }

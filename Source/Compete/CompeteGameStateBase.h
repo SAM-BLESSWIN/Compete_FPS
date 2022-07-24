@@ -21,8 +21,9 @@ protected:
 	uint16 TotalHits;
 
 	UFUNCTION()
-		void OnRep_TotalHits();
+	void OnRep_TotalHits();
 
 public:
 	void PlayerHit();
+	uint16 GetTotalHits() const;
 };

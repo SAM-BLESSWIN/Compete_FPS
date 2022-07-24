@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Compete/CompeteCharacter.h"
 #include "Compete/CompeteGameMode.h"
+#include "Compete/CompetePlayerState.h"
 
 ACompeteProjectile::ACompeteProjectile() 
 {
@@ -43,11 +44,28 @@ void ACompeteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	}
 	else if (ACompeteCharacter* Character = Cast<ACompeteCharacter>(OtherActor))
 	{
-		if (HasAuthority())
-		{//ON THE SERVER
+		//Authority is simply the one who spawned the Actor
+		if (HasAuthority())  
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Authority of Projectile"));
+
 			if (ACompeteGameMode* GM = GetWorld()->GetAuthGameMode<ACompeteGameMode>())
-			{
+			{//ON THE SERVER : Server only has GameMode
+				UE_LOG(LogTemp, Warning, TEXT("Has GameMode [server]"));
+
+				//Update GameState from GameMode
 				GM->PlayerHit();
+
+				if (ACompeteCharacter* ShootingPlayer = Cast<ACompeteCharacter>(GetOwner()))
+				{
+					if (ACompetePlayerState* PS = ShootingPlayer->GetPlayerState<ACompetePlayerState>())
+					{
+						UE_LOG(LogTemp, Warning, TEXT("ShootingPlayer [Server]"));
+
+						//Update PlayerState
+						PS->PlayerHit();
+					}
+				}
 			}
 		}
 		Destroy();

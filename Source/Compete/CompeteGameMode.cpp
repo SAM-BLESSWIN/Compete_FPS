@@ -14,10 +14,9 @@ ACompeteGameMode::ACompeteGameMode()
 }
 
 void ACompeteGameMode::PlayerHit()
-{
+{//CALLED ON THE SERVER
 	if (ACompeteGameStateBase* GS = GetGameState<ACompeteGameStateBase>())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GameMode:PlayerHit Called"));
 		GS->PlayerHit();
 	}
 }

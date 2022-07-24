@@ -116,8 +116,6 @@ void ACompeteCharacter::Fired(UTP_WeaponComponent* Weapon,FVector SpawnLocation,
 
 	if (!GetWorld()->IsServer())
 	{//ON THE CLIENT
-		UE_LOG(LogTemp, Warning, TEXT("Client call to Server!!"));
-
 		/*projectile spawned locally by WeaponComponent*/
 		/*Data are passed to server*/
 		/*Projectile spawned on remote, Play fire sound and animation to all : Multicast by server*/
@@ -142,7 +140,6 @@ bool ACompeteCharacter::Server_OnFire_Validate(UTP_WeaponComponent* Weapon,FVect
 
 void ACompeteCharacter::Server_OnFire_Implementation(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server Call!!"));
 	Multi_OnFire(Weapon, Location, Rotation);
 }
 
