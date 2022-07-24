@@ -85,7 +85,6 @@ public:
 	void Fired(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
 
 protected:
-
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_OnFire(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
 	bool Server_OnFire_Validate(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
@@ -96,4 +95,3 @@ protected:
 	bool Multi_OnFire_Validate(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation);
 	void Multi_OnFire_Implementation(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation);
 };
-

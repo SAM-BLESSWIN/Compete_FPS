@@ -9,6 +9,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,6 @@ ACompeteCharacter::ACompeteCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
-
 }
 
 void ACompeteCharacter::BeginPlay()
@@ -80,7 +80,6 @@ void ACompeteCharacter::OnPrimaryAction()
 	OnUseItem.Broadcast();
 }
 
-
 void ACompeteCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
@@ -117,6 +116,8 @@ void ACompeteCharacter::Fired(UTP_WeaponComponent* Weapon,FVector SpawnLocation,
 
 	if (!GetWorld()->IsServer())
 	{//ON THE CLIENT
+		UE_LOG(LogTemp, Warning, TEXT("Client call to Server!!"));
+
 		/*projectile spawned locally by WeaponComponent*/
 		/*Data are passed to server*/
 		/*Projectile spawned on remote, Play fire sound and animation to all : Multicast by server*/
@@ -141,7 +142,7 @@ bool ACompeteCharacter::Server_OnFire_Validate(UTP_WeaponComponent* Weapon,FVect
 
 void ACompeteCharacter::Server_OnFire_Implementation(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server_OnFire_Implementation Called!!"));
+	UE_LOG(LogTemp, Warning, TEXT("Server Call!!"));
 	Multi_OnFire(Weapon, Location, Rotation);
 }
 

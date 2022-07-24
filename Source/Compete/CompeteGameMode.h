@@ -13,6 +13,7 @@ class ACompeteGameMode : public AGameModeBase
 
 public:
 	ACompeteGameMode();
+	void PlayerHit();
 };
 
 

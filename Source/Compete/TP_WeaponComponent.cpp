@@ -70,7 +70,6 @@ void UTP_WeaponComponent::PlayFireSound()
 	if (FireSound != nullptr)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("Fire Sound Played"));
 	}
 }
 

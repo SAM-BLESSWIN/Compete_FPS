@@ -3,6 +3,8 @@
 #include "CompeteProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Compete/CompeteCharacter.h"
+#include "Compete/CompeteGameMode.h"
 
 ACompeteProjectile::ACompeteProjectile() 
 {
@@ -37,7 +39,18 @@ void ACompeteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
 		Destroy();
 	}
+	else if (ACompeteCharacter* Character = Cast<ACompeteCharacter>(OtherActor))
+	{
+		if (HasAuthority())
+		{//ON THE SERVER
+			if (ACompeteGameMode* GM = GetWorld()->GetAuthGameMode<ACompeteGameMode>())
+			{
+				GM->PlayerHit();
+			}
+		}
+		Destroy();
+	}
+
 }
