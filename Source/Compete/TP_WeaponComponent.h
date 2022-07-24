@@ -41,6 +41,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
 
+	void SpawnProjectile(const FVector& SpawnLocation, const FRotator& SpawnRotation);
+
+	void PlayFireAnimation();
+	void PlayFireSound();
+
 protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()
@@ -50,4 +55,5 @@ protected:
 private:
 	/** The Character holding this weapon*/
 	ACompeteCharacter* Character;
+
 };

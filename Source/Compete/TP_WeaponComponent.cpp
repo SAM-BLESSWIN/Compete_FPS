@@ -33,22 +33,25 @@ void UTP_WeaponComponent::Fire()
 			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
 			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-	
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	
-			// Spawn the projectile at the muzzle
-			World->SpawnActor<ACompeteProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			
+			SpawnProjectile(SpawnLocation,SpawnRotation);
+			PlayFireSound();
+			PlayFireAnimation();
+
+			Character->Fired(this,SpawnLocation, SpawnRotation);
 		}
 	}
-	
-	// Try and play the sound if specified
-	if (FireSound != nullptr)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
-	}
-	
+}
+
+void UTP_WeaponComponent::SpawnProjectile(const FVector& SpawnLocation, const FRotator& SpawnRotation)
+{
+	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	GetWorld()->SpawnActor<ACompeteProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+}
+
+void UTP_WeaponComponent::PlayFireAnimation()
+{
 	// Try and play a firing animation if specified
 	if (FireAnimation != nullptr)
 	{
@@ -60,6 +63,17 @@ void UTP_WeaponComponent::Fire()
 		}
 	}
 }
+
+void UTP_WeaponComponent::PlayFireSound()
+{
+	// Try and play the sound if specified
+	if (FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
+		UE_LOG(LogTemp, Warning, TEXT("Fire Sound Played"));
+	}
+}
+
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {

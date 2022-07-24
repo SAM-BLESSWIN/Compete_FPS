@@ -2,11 +2,13 @@
 
 #include "CompeteCharacter.h"
 #include "CompeteProjectile.h"
+#include "TP_WeaponComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "Kismet/GameplayStatics.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -58,8 +60,6 @@ void ACompeteCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	// Bind fire event
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &ACompeteCharacter::OnPrimaryAction);
 
-	// Enable touchscreen input
-	EnableTouchscreenMovement(PlayerInputComponent);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ACompeteCharacter::MoveForward);
@@ -80,30 +80,6 @@ void ACompeteCharacter::OnPrimaryAction()
 	OnUseItem.Broadcast();
 }
 
-void ACompeteCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == true)
-	{
-		return;
-	}
-	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
-	{
-		OnPrimaryAction();
-	}
-	TouchItem.bIsPressed = true;
-	TouchItem.FingerIndex = FingerIndex;
-	TouchItem.Location = Location;
-	TouchItem.bMoved = false;
-}
-
-void ACompeteCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == false)
-	{
-		return;
-	}
-	TouchItem.bIsPressed = false;
-}
 
 void ACompeteCharacter::MoveForward(float Value)
 {
@@ -135,15 +111,58 @@ void ACompeteCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
-bool ACompeteCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
+void ACompeteCharacter::Fired(UTP_WeaponComponent* Weapon,FVector SpawnLocation, FRotator SpawnRotation)
 {
-	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
-	{
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ACompeteCharacter::BeginTouch);
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Released, this, &ACompeteCharacter::EndTouch);
+	if (Weapon == nullptr) return;
 
-		return true;
+	if (!GetWorld()->IsServer())
+	{//ON THE CLIENT
+		/*projectile spawned locally by WeaponComponent*/
+		/*Data are passed to server*/
+		/*Projectile spawned on remote, Play fire sound and animation to all : Multicast by server*/
+
+		//RPC Call
+		Server_OnFire(Weapon,SpawnLocation,SpawnRotation);
 	}
-	
-	return false;
+	else
+	{//ON THE SERVER
+
+		/*projectile spawned locally by WeaponComponent*/
+		/*Projectile spawned on remote, Play fire sound and animation to all : Multicast by server*/
+		Multi_OnFire(Weapon, SpawnLocation, SpawnRotation);
+	}
+}
+
+
+bool ACompeteCharacter::Server_OnFire_Validate(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation)
+{
+	return true;
+}
+
+void ACompeteCharacter::Server_OnFire_Implementation(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Server_OnFire_Implementation Called!!"));
+	Multi_OnFire(Weapon, Location, Rotation);
+}
+
+
+bool ACompeteCharacter::Multi_OnFire_Validate(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation)
+{
+	return true;
+}
+
+void ACompeteCharacter::Multi_OnFire_Implementation(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation)
+{
+	if (!IsLocallyControlled())
+	{//ON THE REMOTE SYSTEM
+
+		//Spawn Projectile
+		Weapon->SpawnProjectile(Location, Rotation);
+
+		//Play Sound
+		Weapon->PlayFireSound();
+
+		//Play Anim
+		Weapon->PlayFireAnimation();
+	}
 }

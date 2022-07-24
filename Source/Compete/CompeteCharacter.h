@@ -10,6 +10,7 @@ class UInputComponent;
 class USkeletalMeshComponent;
 class USceneComponent;
 class UCameraComponent;
+class UTP_WeaponComponent;
 class UAnimMontage;
 class USoundBase;
 
@@ -44,6 +45,7 @@ public:
 	/** Delegate to whom anyone can subscribe to receive this event */
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnUseItem;
+
 protected:
 	
 	/** Fires a projectile. */
@@ -67,31 +69,12 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	struct TouchData
-	{
-		TouchData() { bIsPressed = false;Location=FVector::ZeroVector;}
-		bool bIsPressed;
-		ETouchIndex::Type FingerIndex;
-		FVector Location;
-		bool bMoved;
-	};
-	void BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
-	void EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
-	void TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location);
-	TouchData	TouchItem;
 	
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
 
-	/* 
-	 * Configures input for touchscreen devices if there is a valid touch interface for doing so 
-	 *
-	 * @param	InputComponent	The input component pointer to bind controls to
-	 * @returns true if touch controls were enabled.
-	 */
-	bool EnableTouchscreenMovement(UInputComponent* InputComponent);
 
 public:
 	/** Returns Mesh1P subobject **/
@@ -99,5 +82,18 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	void Fired(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
+
+protected:
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_OnFire(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
+	bool Server_OnFire_Validate(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
+	void Server_OnFire_Implementation(UTP_WeaponComponent* Weapon,FVector Location, FRotator Rotation);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_OnFire(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation);
+	bool Multi_OnFire_Validate(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation);
+	void Multi_OnFire_Implementation(UTP_WeaponComponent* Weapon, FVector Location, FRotator Rotation);
 };
 
